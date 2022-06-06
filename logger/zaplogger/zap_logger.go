@@ -82,7 +82,7 @@ func (l *zapLogger) wrap(entry *logger.LogEntry) *zap.SugaredLogger {
 	if entry.ParentId != "" {
 		wrapL = wrapL.With(zap.String("parent_id", entry.ParentId))
 	}
-	if entry.Extra != nil {
+	if entry.Extra != nil && len(entry.Extra) > 0 {
 		wrapL = wrapL.With(zap.Any("extra", entry.Extra))
 	}
 
