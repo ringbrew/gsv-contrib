@@ -123,7 +123,7 @@ func (l *zapLogger) Error(entry *logger.LogEntry) {
 
 func (l *zapLogger) Fatal(entry *logger.LogEntry) {
 	if l.shouldLog(logger.LevelFatal) {
-		l.wrap(entry).Error(entry.Message)
+		l.wrap(entry).Panic(entry.Message)
 	}
 }
 
