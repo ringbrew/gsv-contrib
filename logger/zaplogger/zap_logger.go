@@ -37,6 +37,7 @@ func newZapLogger(opts ...Option) *zapLogger {
 	config.EncoderConfig.TimeKey = "time"
 	config.EncoderConfig.EncodeTime = customTimeEncoder
 	config.EncoderConfig.CallerKey = zapcore.OmitKey
+	config.Level.SetLevel(zapcore.DebugLevel)
 
 	skip := 0
 
