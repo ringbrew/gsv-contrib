@@ -15,14 +15,17 @@ import (
 )
 
 type EtcdDiscovery struct {
-	client     *clientv3.Client
-	prefix     string
-	nodeCancel sync.Map
+	client            *clientv3.Client
+	prefix            string
+	keepAliveInterval int64
+	nodeCancel        sync.Map
 	sync.RWMutex
 }
 
 type Option struct {
-	Endpoint []string
+	Endpoint          []string
+	Prefix            string
+	KeepAliveInterval int64
 }
 
 const leaseIdKey = "etcd_lease_id"
@@ -36,19 +39,32 @@ func NewEtcdDiscovery(opt Option) (*EtcdDiscovery, error) {
 		return nil, err
 	}
 
+	prefix := "gsv"
+
+	if opt.Prefix != "" {
+		prefix = opt.Prefix
+	}
+
+	keepAliveInterval := int64(30)
+	if opt.KeepAliveInterval != 0 {
+		keepAliveInterval = opt.KeepAliveInterval
+	}
+
 	result := &EtcdDiscovery{
-		client: client,
+		client:            client,
+		prefix:            prefix,
+		keepAliveInterval: keepAliveInterval,
 	}
 
 	return result, nil
 }
 
 func (e *EtcdDiscovery) nodePath(name string, nodeType discovery.Type) string {
-	return fmt.Sprintf("/%s/%s", name, nodeType)
+	return fmt.Sprintf("/%s/%s/%s", e.prefix, name, nodeType)
 }
 
 func (e *EtcdDiscovery) nodeKey(node *discovery.Node) string {
-	return fmt.Sprintf("/%s/%s/%s", node.Name, node.Type, node.Id)
+	return fmt.Sprintf("/%s/%s/%s/%s", e.prefix, node.Name, node.Type, node.Id)
 }
 
 func (e *EtcdDiscovery) encodeNode(node *discovery.Node) string {
@@ -130,7 +146,7 @@ func (e *EtcdDiscovery) Register(node *discovery.Node) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	leaseResp, err := lease.Grant(ctx, 30)
+	leaseResp, err := lease.Grant(ctx, e.keepAliveInterval)
 	if err != nil {
 		return err
 	}
@@ -166,6 +182,7 @@ func (e *EtcdDiscovery) KeepAlive(node *discovery.Node) error {
 	}
 
 	for leaseKeepResp := range leaseRespChan {
+		logger.Debug(logger.NewEntry().WithMessage(fmt.Sprintf("node[%s]-[%s]-[%d] lease keep alive resp:[%v]", node.Name, node.Host, node.Port, leaseKeepResp)))
 		node.Extra.Store(leaseIdKey, leaseKeepResp.ID)
 	}
 
