@@ -36,10 +36,10 @@ func newZapLogger(opts ...Option) *zapLogger {
 	config.ErrorOutputPaths = []string{"stdout"}
 	config.EncoderConfig.TimeKey = "time"
 	config.EncoderConfig.EncodeTime = customTimeEncoder
-	config.EncoderConfig.CallerKey = zapcore.OmitKey
+	config.EncoderConfig.CallerKey = "caller"
 	config.Level.SetLevel(zapcore.DebugLevel)
 
-	skip := 0
+	skip := 2
 
 	if len(opts) > 0 {
 		opt := opts[0]
