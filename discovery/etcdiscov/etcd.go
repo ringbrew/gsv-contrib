@@ -23,9 +23,9 @@ type EtcdDiscovery struct {
 }
 
 type Option struct {
-	Endpoint          []string
-	Prefix            string
-	KeepAliveInterval int64
+	Endpoint          []string `yaml:"endpoint"`
+	Prefix            string   `yaml:"prefix"`
+	KeepAliveInterval int64    `yaml:"keep_alive_interval"`
 }
 
 const leaseIdKey = "etcd_lease_id"
