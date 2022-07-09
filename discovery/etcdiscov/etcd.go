@@ -182,7 +182,6 @@ func (e *EtcdDiscovery) KeepAlive(node *discovery.Node) error {
 	}
 
 	for leaseKeepResp := range leaseRespChan {
-		logger.Debug(logger.NewEntry().WithMessage(fmt.Sprintf("node[%s]-[%s]-[%d] lease keep alive resp:[%v]", node.Name, node.Host, node.Port, leaseKeepResp)))
 		node.Extra.Store(leaseIdKey, leaseKeepResp.ID)
 	}
 
