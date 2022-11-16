@@ -94,6 +94,10 @@ func (l *zapLogger) SetLevel(level logger.Level) {
 	l.level = level
 }
 
+func (l *zapLogger) GetLevel() logger.Level {
+	return l.level
+}
+
 func (l *zapLogger) shouldLog(level logger.Level) bool {
 	return l.level <= level
 }
