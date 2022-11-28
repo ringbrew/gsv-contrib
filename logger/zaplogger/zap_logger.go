@@ -4,6 +4,7 @@ import (
 	"github.com/ringbrew/gsv/logger"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"log"
 	"time"
 )
 
@@ -58,7 +59,10 @@ func newZapLogger(opts ...Option) *zapLogger {
 		}
 	}
 
-	l, _ := config.Build()
+	l, err := config.Build()
+	if err != nil {
+		log.Fatal("zap config build error:", err.Error())
+	}
 
 	if skip > 0 {
 		l = l.WithOptions(zap.AddCallerSkip(skip))
