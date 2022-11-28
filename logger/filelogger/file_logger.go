@@ -6,6 +6,7 @@ import (
 	"github.com/ringbrew/gsv/logger"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -30,6 +31,13 @@ func newFileLogger(opts ...Option) *fileLogger {
 
 	if len(opts) > 0 && opts[0].Path != "" {
 		fp = opts[0].Path
+	}
+
+	dir, _ := filepath.Split(fp)
+	if dir != "" {
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			log.Fatal(err.Error())
+		}
 	}
 
 	f, err := os.OpenFile(fp, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
@@ -99,14 +107,11 @@ func (l *fileLogger) writeEntry(entry *logger.LogEntry, level logger.Level) {
 		sb.WriteString(fmt.Sprintf("-[extra-%s]", string(extraData)))
 	}
 
-	l.file.WriteString(sb.String())
+	l.write(sb.String())
 }
 
 func (l *fileLogger) write(data string) {
-	if _, err := l.file.WriteString(data); err != nil {
-		log.Println("log error:", err.Error())
-	}
-	if _, err := l.file.WriteString("\n"); err != nil {
+	if _, err := l.file.WriteString(fmt.Sprintf("%s\n", data)); err != nil {
 		log.Println("log error:", err.Error())
 	}
 	return
