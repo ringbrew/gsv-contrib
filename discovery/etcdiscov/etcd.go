@@ -165,18 +165,18 @@ func (e *EtcdDiscovery) KeepAlive(node *discovery.Node) error {
 	ctx, cancel := context.WithCancel(context.Background())
 	e.nodeCancel.Store(node.Id, cancel)
 
-	id, exist := node.Extra.Load(leaseIdKey)
-	if !exist {
-		return errors.New("lease id not found")
-	}
-
-	leaseId, ok := id.(clientv3.LeaseID)
-	if !ok {
-		return fmt.Errorf("invalid lease id: %v", id)
-	}
-
 	ticker := time.NewTicker((time.Duration(e.keepAliveInterval) * time.Second) / 3)
 	for range ticker.C {
+		id, exist := node.Extra.Load(leaseIdKey)
+		if !exist {
+			return errors.New("lease id not found")
+		}
+
+		leaseId, ok := id.(clientv3.LeaseID)
+		if !ok {
+			return fmt.Errorf("invalid lease id: %v", id)
+		}
+
 		resp, err := e.client.KeepAliveOnce(ctx, leaseId)
 		if err != nil {
 			logger.Error(logger.NewEntry().WithMessageF("keep alive lease[%d] error[%s]", leaseId, err.Error()))
