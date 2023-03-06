@@ -73,7 +73,10 @@ func (e *EtcdDiscovery) encodeNode(node *discovery.Node) string {
 }
 
 func (e *EtcdDiscovery) Node(name string, nodeType discovery.Type) ([]*discovery.Node, error) {
-	resp, err := e.client.Get(context.Background(), e.nodePath(name, nodeType), clientv3.WithPrefix())
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	resp, err := e.client.Get(ctx, e.nodePath(name, nodeType), clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +105,10 @@ func (e *EtcdDiscovery) Watch(name string, nodeType discovery.Type) (chan discov
 				logger.Error(logger.NewEntry().WithMessage(fmt.Sprintf("etcd discovery watch[%s][%s] panic:%v", name, nodeType, p)))
 			}
 		}()
-		watchChan := watcher.Watch(context.TODO(), e.nodePath(name, nodeType), clientv3.WithPrefix(), clientv3.WithPrevKV())
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		watchChan := watcher.Watch(ctx, e.nodePath(name, nodeType), clientv3.WithPrefix(), clientv3.WithPrevKV())
 		for watchResp := range watchChan {
 			for _, event := range watchResp.Events {
 				switch event.Type {
