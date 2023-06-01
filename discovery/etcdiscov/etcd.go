@@ -105,10 +105,8 @@ func (e *EtcdDiscovery) Watch(name string, nodeType discovery.Type) (chan discov
 				logger.Error(logger.NewEntry().WithMessage(fmt.Sprintf("etcd discovery watch[%s][%s] panic:%v", name, nodeType, p)))
 			}
 		}()
-		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
 
-		watchChan := watcher.Watch(ctx, e.nodePath(name, nodeType), clientv3.WithPrefix(), clientv3.WithPrevKV())
+		watchChan := watcher.Watch(context.Background(), e.nodePath(name, nodeType), clientv3.WithPrefix(), clientv3.WithPrevKV())
 		for watchResp := range watchChan {
 			for _, event := range watchResp.Events {
 				switch event.Type {
