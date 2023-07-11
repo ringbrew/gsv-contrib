@@ -10,6 +10,7 @@ import (
 	"github.com/ringbrew/gsv/logger"
 	"go.etcd.io/etcd/api/v3/mvccpb"
 	"go.etcd.io/etcd/client/v3"
+	"google.golang.org/grpc"
 	"sync"
 	"time"
 )
@@ -28,12 +29,29 @@ type Option struct {
 	KeepAliveInterval int64    `yaml:"keep_alive_interval"`
 }
 
+type commandLogger struct{}
+
+func (c *commandLogger) UnaryInterceptor(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+	logger.Debug(logger.NewEntry(ctx).WithMessageF("sending cmd to etcd server, method[%s], req param[%v]", method, req))
+	if err := invoker(ctx, method, req, reply, cc, opts...); err != nil {
+		return err
+	}
+	logger.Debug(logger.NewEntry(ctx).WithMessageF("sending cmd to etcd server, method[%s], resp param[%v]", method, reply))
+	return nil
+}
+
 const leaseIdKey = "etcd_lease_id"
 
 func NewEtcdDiscovery(opt Option) (*EtcdDiscovery, error) {
+	grpcOpts := make([]grpc.DialOption, 0)
+
+	interceptor := &commandLogger{}
+	grpcOpts = append(grpcOpts, grpc.WithUnaryInterceptor(interceptor.UnaryInterceptor))
+
 	client, err := clientv3.New(clientv3.Config{
 		Endpoints:   opt.Endpoint,
 		DialTimeout: 5 * time.Second,
+		DialOptions: grpcOpts,
 	})
 	if err != nil {
 		return nil, err
