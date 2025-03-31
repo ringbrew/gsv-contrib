@@ -79,14 +79,14 @@ func NewEtcdDiscovery(opt Option) (*EtcdDiscovery, error) {
 
 func (e *EtcdDiscovery) nodePath(name string, nodeType discovery.Type, tag ...string) string {
 	if len(tag) > 0 && tag[0] != "" {
-		return fmt.Sprintf("/%s/%s/%s/%s", e.prefix, name, nodeType, tag[0])
+		return fmt.Sprintf("/%s/%s/%s.%s", e.prefix, name, nodeType, tag[0])
 	}
 	return fmt.Sprintf("/%s/%s/%s", e.prefix, name, nodeType)
 }
 
 func (e *EtcdDiscovery) nodeKey(node *discovery.Node) string {
 	if node.Tag != "" {
-		return fmt.Sprintf("/%s/%s/%s/%s/%s", e.prefix, node.Name, node.Type, node.Tag, node.Id)
+		return fmt.Sprintf("/%s/%s/%s.%s/%s", e.prefix, node.Name, node.Type, node.Tag, node.Id)
 	}
 	return fmt.Sprintf("/%s/%s/%s/%s", e.prefix, node.Name, node.Type, node.Id)
 }
