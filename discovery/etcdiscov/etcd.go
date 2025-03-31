@@ -77,11 +77,17 @@ func NewEtcdDiscovery(opt Option) (*EtcdDiscovery, error) {
 	return result, nil
 }
 
-func (e *EtcdDiscovery) nodePath(name string, nodeType discovery.Type) string {
+func (e *EtcdDiscovery) nodePath(name string, nodeType discovery.Type, tag ...string) string {
+	if len(tag) > 0 && tag[0] != "" {
+		return fmt.Sprintf("/%s/%s/%s/%s", e.prefix, name, nodeType, tag[0])
+	}
 	return fmt.Sprintf("/%s/%s/%s", e.prefix, name, nodeType)
 }
 
 func (e *EtcdDiscovery) nodeKey(node *discovery.Node) string {
+	if node.Tag != "" {
+		return fmt.Sprintf("/%s/%s/%s/%s/%s", e.prefix, node.Name, node.Type, node.Tag, node.Id)
+	}
 	return fmt.Sprintf("/%s/%s/%s/%s", e.prefix, node.Name, node.Type, node.Id)
 }
 
@@ -90,11 +96,11 @@ func (e *EtcdDiscovery) encodeNode(node *discovery.Node) string {
 	return string(val)
 }
 
-func (e *EtcdDiscovery) Node(name string, nodeType discovery.Type) ([]*discovery.Node, error) {
+func (e *EtcdDiscovery) Node(name string, nodeType discovery.Type, tag ...string) ([]*discovery.Node, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	resp, err := e.client.Get(ctx, e.nodePath(name, nodeType), clientv3.WithPrefix())
+	resp, err := e.client.Get(ctx, e.nodePath(name, nodeType, tag...), clientv3.WithPrefix())
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +119,7 @@ func (e *EtcdDiscovery) Node(name string, nodeType discovery.Type) ([]*discovery
 	return result, nil
 }
 
-func (e *EtcdDiscovery) Watch(name string, nodeType discovery.Type) (chan discovery.NodeEvent, error) {
+func (e *EtcdDiscovery) Watch(name string, nodeType discovery.Type, tag ...string) (chan discovery.NodeEvent, error) {
 	result := make(chan discovery.NodeEvent)
 	watcher := clientv3.NewWatcher(e.client)
 
@@ -124,7 +130,7 @@ func (e *EtcdDiscovery) Watch(name string, nodeType discovery.Type) (chan discov
 			}
 		}()
 
-		watchChan := watcher.Watch(context.Background(), e.nodePath(name, nodeType), clientv3.WithPrefix(), clientv3.WithPrevKV())
+		watchChan := watcher.Watch(context.Background(), e.nodePath(name, nodeType, tag...), clientv3.WithPrefix(), clientv3.WithPrevKV())
 		for watchResp := range watchChan {
 			for _, event := range watchResp.Events {
 				switch event.Type {
