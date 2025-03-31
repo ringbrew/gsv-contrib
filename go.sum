@@ -123,6 +123,8 @@ github.com/prometheus/procfs v0.1.3/go.mod h1:lV6e/gmhEcM9IjHGsFOCxxuZ+z1YqCvr4O
 github.com/prometheus/procfs v0.6.0/go.mod h1:cz+aTbrPOrUb4q7XlbU9ygM+/jj0fzG6c1xBZuNvfVA=
 github.com/ringbrew/gsv v1.5.3 h1:h3NLjO6WZcPzhynvx3l7eyT9cVrWEtkl8xTd6imar7c=
 github.com/ringbrew/gsv v1.5.3/go.mod h1:ty9AE1tVmDIp777eryxHLOaKnDap+OjbPeKyrkeAdLk=
+github.com/ringbrew/gsv v1.5.4 h1:jpWB0e5cLp8+0BWWB2feIY5+w9KJpUgAPe34I2lsn/8=
+github.com/ringbrew/gsv v1.5.4/go.mod h1:ty9AE1tVmDIp777eryxHLOaKnDap+OjbPeKyrkeAdLk=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/sirupsen/logrus v1.2.0/go.mod h1:LxeOpSwHxABJmUn/MG1IvRgCAasNZTLOkJPxbbu5VWo=
 github.com/sirupsen/logrus v1.4.2/go.mod h1:tLMulIdttU9McNUspp0xgXVQah82FyeX6MwdIuYE2rE=
